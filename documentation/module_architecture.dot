@@ -1,0 +1,35 @@
+// A graph of the overall project arcitecture broken up by modules
+// Each module is contained entirely within the single docker container
+
+digraph Modules {
+
+    node [shape=box, style=filled, fillcolor=white];
+
+    subgraph cluster_user_interfaces {
+        label = "User interfaces";
+        style=filled;
+        fillcolor=grey;
+        node [shape=box, style=filled];
+        rankdir="LR";
+        rank=same;
+        simplepages;
+        complexapp1;
+        complexapp2;
+    }
+
+    user [shape=ellipse];
+
+    rankdir="LR";
+    user -> nginx;
+
+    nginx -> complexapp1;
+    nginx -> simplepages [constraint=false];
+    nginx -> complexapp2 [constraint=false];
+    nginx -> api [constraint=false];
+
+    complexapp1 -> api;
+    simplepages -> api [constraint=false];
+    complexapp2 -> api [constraint=false];
+
+    api -> database;
+}
