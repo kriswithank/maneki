@@ -1,0 +1,9 @@
+version: '3'
+
+services:
+  simplepages:
+    build: ./simplepages
+    volumes:
+      - ./simplepages/simplepages:/app/src
+    ports:
+      - 80:80
