@@ -6,3 +6,9 @@ services:
       - ./simplepages/simplepages:/app/src
     ports:
       - 5000:80
+  
+  api-finances:
+    volumes:
+      - ./api-finances/api-finances:/app/src
+    ports:
+      - 5001:80

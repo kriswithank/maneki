@@ -4,6 +4,9 @@ services:
   simplepages:
     build: ./simplepages
 
+  api-finances:
+    build: ./api-finances
+
   nginx:
     build: ./nginx
     ports:
