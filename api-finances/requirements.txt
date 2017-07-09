@@ -1,3 +1,5 @@
-gunicorn
 flask
 flask_restful
+flask_sqlalchemy
+gunicorn
+psycopg2
