@@ -2,12 +2,14 @@ version: '3'
 
 services:
   simplepages:
+    command: 'flask run --host=0.0.0.0 --port=80'
     volumes:
       - ./simplepages/simplepages:/app/src
     ports:
       - 5000:80
   
   api-finances:
+    command: 'flask run --host=0.0.0.0 --port=80'
     volumes:
       - ./api-finances/api-finances:/app/src
     ports:

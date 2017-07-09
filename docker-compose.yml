@@ -1,11 +1,13 @@
 version: '3'
 
 services:
-  simplepages:
-    build: ./simplepages
-
   api-finances:
     build: ./api-finances
+
+  simplepages:
+    build: ./simplepages
+    depends_on:
+      - api-finances
 
   nginx:
     build: ./nginx
