@@ -1,11 +1,14 @@
+"""
+A restful api for authorizing users using Jason Web Tokens
+"""
+from datetime import datetime, timedelta
+
 import click
 import jwt
-from datetime import datetime, timedelta
-from flask import Flask,  request
+from flask import Flask, request
 from flask.json import jsonify
-from flask_restful import Resource, Api
+from flask_restful import Api, Resource
 from flask_sqlalchemy import SQLAlchemy
-
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'notverysecure'
@@ -15,13 +18,16 @@ api = Api(app)
 
 
 class User(db.Model):
+    """A simple model representation of a user"""
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(100))
     password = db.Column(db.String(1000))
 
 
 class UserResource(Resource):
+    """A restful resource for users"""
     def post(self):
+        """Change a user's password"""
         # Request must be JSON
         if not request.is_json:
             return jsonify({'message': 'Request must be JSON'})
@@ -64,6 +70,7 @@ api.add_resource(UserResource, '/user')
 
 @app.route('/test-post', methods=['POST'])
 def test_post_endpoint():
+    """A temporary endpoint to test how passing data works in flask"""
     json_stuff = request.get_json()
     print(str(json_stuff))
     foo_data = json_stuff['foo']
@@ -77,10 +84,11 @@ def get_token():
     """
     Returns a JSON repsonse with JWT token for validation in other apis.
 
-    Expects a GET response with 'Content-Type: application/json' header and data
-    of the form {"username": "someuser", "password": "someuserspassword"}.
+    Expects a GET response with 'Content-Type: application/json' header and
+    data of the form {"username": "someuser", "password": "someuserspassword"}.
 
-    Returns a JSON response of the form {"message": "someresponse", "token": "sometoken"}
+    Returns a JSON response of the form
+        {"message": "someresponse", "token": "sometoken"}
     The token key is only present in the event of a successful authorization.
 
     Token expires after 24 hours.
@@ -124,10 +132,12 @@ def get_token():
         'token': token})
 
 
-# A simple validation route for demo purposes, should be taken out (or maybe
-# moved to the readme/wiki after we get some more infrastructure up
 @app.route('/is-valid', methods=['GET'])
 def is_valid():
+    """
+    A simple validation route for demo purposes, should be taken out (or maybe
+    moved to the readme/wiki after we get some more infrastructure up
+    """
     # Request must be JSON
     if not request.is_json:
         return jsonify({'message': 'Request must be JSON'})
@@ -151,12 +161,22 @@ def is_valid():
 
 @app.cli.command()
 def initdb():
+    """
+    Create all SQLAlchemy tables
+
+    Run from terminal using 'flask initdb'.
+    """
     db.create_all()
     click.echo('Created all tables')
 
 
 @app.cli.command()
 def dropdb():
+    """
+    Drop all tables in database
+
+    Run from terminal using 'flask dropdb'
+    """
     db.drop_all()
     click.echo('Dropped all tables')
 
