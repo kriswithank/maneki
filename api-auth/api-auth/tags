@@ -1,0 +1,21 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_OUTPUT_MODE	u-ctags	/u-ctags or e-ctags/
+!_TAG_PROGRAM_AUTHOR	Universal Ctags Team	//
+!_TAG_PROGRAM_NAME	Universal Ctags	/Derived from Exuberant Ctags/
+!_TAG_PROGRAM_URL	https://ctags.io/	/official site/
+!_TAG_PROGRAM_VERSION	0.0.0	/4d14afcc/
+User	app.py	/^class User(db.Model):$/;"	c
+UserResource	app.py	/^class UserResource(Resource):$/;"	c
+api	app.py	/^api = Api(app)$/;"	v
+app	app.py	/^app = Flask(__name__)$/;"	v
+db	app.py	/^db = SQLAlchemy(app)$/;"	v
+dropdb	app.py	/^def dropdb():$/;"	f
+get_token	app.py	/^def get_token():$/;"	f
+id	app.py	/^    id = db.Column(db.Integer, primary_key=True)$/;"	v	class:User
+initdb	app.py	/^def initdb():$/;"	f
+is_valid	app.py	/^def is_valid():$/;"	f
+password	app.py	/^    password = db.Column(db.String(1000))$/;"	v	class:User
+post	app.py	/^    def post(self):$/;"	m	class:UserResource
+test_post_endpoint	app.py	/^def test_post_endpoint():$/;"	f
+username	app.py	/^    username = db.Column(db.String(100))$/;"	v	class:User
