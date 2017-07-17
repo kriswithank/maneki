@@ -1,5 +1,5 @@
 """
-A restful api for authorizing users using Jason Web Tokens
+A RESTful api for authorizing users using Jason Web Tokens
 """
 from datetime import datetime, timedelta
 
@@ -7,7 +7,7 @@ import click
 import jwt
 from flask import Flask, request
 from flask.json import jsonify
-from flask_restful import Api, Resource
+from flask_restful import Api, Resource, reqparse
 from flask_sqlalchemy import SQLAlchemy
 
 app = Flask(__name__)
@@ -24,112 +24,100 @@ class User(db.Model):
     password = db.Column(db.String(1000))
 
 
-class UserResource(Resource):
+class UserResourse(Resource):
     """A restful resource for users"""
+    def put(self):
+        """Create a new user"""
+        pass
+
     def post(self):
-        """Change a user's password"""
-        # Request must be JSON
-        if not request.is_json:
-            return jsonify({'message': 'Request must be JSON'})
+        """Modify an existing user"""
+        pass
 
-        try:
-            token = request.get_json()['token']
-            token_data = jwt.decode(token, app.config['SECRET_KEY'], algorithm='HS256')
-
-            print('got token and token_data')
-
-            username = token_data['username']
-            new_password = request.get_json()['new_password']
-
-            print('got username and new password from request')
-
-            found_user = User.query.filter_by(username=username).first()
-
-            if found_user is None:
-                return jsonify({'message': 'Failure, user does not exist'})
-
-            found_user.password = new_password
-            db.session.add(found_user)
-            db.session.commit(found_user)
-
-            return jsonify({'message': 'Success, password changed'})
-        except jwt.exceptions.ExpiredSignatureError:
-            return jsonify({'message': 'Token has expired'})
-        except jwt.exceptions.DecodeError:
-            return jsonify({'message': 'Token is invalid'})
-        except KeyError:
-            return jsonify({'message': 'No token provided'})
-        except:
-            pass  # Ignore other exceptions
-
-        return jsonify({'message': 'A fatal error has occured'})
+    def delete(self):
+        """Delete an existing user"""
+        pass
 
 
-api.add_resource(UserResource, '/user')
+token_parser = reqparse.RequestParser(bundle_errors=True)
+token_parser.add_argument('username', required=True)
+token_parser.add_argument('password', required=True)
 
 
-@app.route('/test-post', methods=['POST'])
-def test_post_endpoint():
-    """A temporary endpoint to test how passing data works in flask"""
-    json_stuff = request.get_json()
-    print(str(json_stuff))
-    foo_data = json_stuff['foo']
-    bar_data = request.form.get('bar')
-    return 'The passed data was foo:{0} bar:{1}'.format(foo_data, bar_data)
+class TokenResourse(Resource):
+    """A RESTful resource for authorization tokens"""
+
+    def get(self):
+        """Get a JWT if the credentials are valid"""
+
+        args = token_parser.parse_args()
+        found_user = User.query.filter_by(username=args['username']).first()
+
+        if found_user is None:
+            return jsonify({'message': {'username': 'No such user exists'}})
+
+        if found_user.password != args['password']:
+            return jsonify({'message': {'password': 'Incorrect password'}})
+
+        expiration = datetime.utcnow() + timedelta(hours=24)
+        content = {
+            'exp': expiration,
+            'username': args['username'],
+        }
+
+        # Recall that encode returns a bytes object, so we will have to encode it
+        # to be able to jsonify the token.
+        token_bytes = jwt.encode(content, app.config['SECRET_KEY'], algorithm='HS256')
+        token = token_bytes.decode('UTF-8')
+
+        return jsonify({
+            'message': 'Success',
+            'token': token})
 
 
-# Once we get tests up, this should be the only route left
-@app.route('/get-token', methods=['GET'])
-def get_token():
-    """
-    Returns a JSON repsonse with JWT token for validation in other apis.
+# class UserResource(Resource):
+#     """A restful resource for users"""
+#     def post(self):
+#         """Change a user's password"""
+#         # Request must be JSON
+#         if not request.is_json:
+#             return jsonify({'message': 'Request must be JSON'})
 
-    Expects a GET response with 'Content-Type: application/json' header and
-    data of the form {"username": "someuser", "password": "someuserspassword"}.
+#         try:
+#             token = request.get_json()['token']
+#             token_data = jwt.decode(token, app.config['SECRET_KEY'], algorithm='HS256')
 
-    Returns a JSON response of the form
-        {"message": "someresponse", "token": "sometoken"}
-    The token key is only present in the event of a successful authorization.
+#             print('got token and token_data')
 
-    Token expires after 24 hours.
-    """
-    # Request must be JSON
-    if not request.is_json:
-        return jsonify({'message': 'Request must be JSON'})
+#             username = token_data['username']
+#             new_password = request.get_json()['new_password']
 
-    try:
-        req_username = request.get_json()['username']
-    except:
-        return jsonify({'message': 'No username provided'})
+#             print('got username and new password from request')
 
-    try:
-        req_password = request.get_json()['password']
-    except:
-        return jsonify({'message': 'No password provided'})
+#             found_user = User.query.filter_by(username=username).first()
 
-    found_user = User.query.filter_by(username=req_username).first()
+#             if found_user is None:
+#                 return jsonify({'message': 'Failure, user does not exist'})
 
-    if found_user is None:
-        return jsonify({'message': 'No such user exists'})
+#             found_user.password = new_password
+#             db.session.add(found_user)
+#             db.session.commit(found_user)
 
-    if found_user.password != req_password:
-        return jsonify({'message': 'Incorrect password'})
+#             return jsonify({'message': 'Success, password changed'})
+#         except jwt.exceptions.ExpiredSignatureError:
+#             return jsonify({'message': 'Token has expired'})
+#         except jwt.exceptions.DecodeError:
+#             return jsonify({'message': 'Token is invalid'})
+#         except KeyError:
+#             return jsonify({'message': 'No token provided'})
+#         except:
+#             pass  # Ignore other exceptions
 
-    expiration = datetime.utcnow() + timedelta(hours=24)
+#         return jsonify({'message': 'A fatal error has occured'})
 
-    content = {
-        'exp': expiration,
-        'username': req_username,
-    }
 
-    # Recall that encode returns a bytes object, so we will have to encode it
-    # to be able to jsonify the token.
-    token_bytes = jwt.encode(content, app.config['SECRET_KEY'], algorithm='HS256')
-    token = token_bytes.decode('UTF-8')
-
-    return jsonify({
-        'message': 'Success',
-        'token': token})
+api.add_resource(UserResourse, '/user')
+api.add_resource(TokenResourse, '/token')
 
 
 @app.route('/is-valid', methods=['GET'])
