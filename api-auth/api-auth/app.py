@@ -1,6 +1,4 @@
-"""
-A RESTful api for authorizing users using Jason Web Tokens
-"""
+"""A RESTful api for authorizing users using Jason Web Tokens."""
 from datetime import datetime, timedelta
 
 import click
@@ -17,25 +15,51 @@ db = SQLAlchemy(app)
 api = Api(app)
 
 
+token_required_parser = reqparse.RequestParser()
+token_required_parser.add_argument('token', required=True)
+
+
 class User(db.Model):
-    """A simple model representation of a user"""
+    """A simple model representation of a user."""
+
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(100))
     password = db.Column(db.String(1000))
 
 
+def token_required(func):
+    """Require decorated functions to have a valid token."""
+    def validate_token(*args, **kwargs):
+        """Return JSON response if the token is invalid, otherwise, proceeds as normal."""
+        args = token_required_parser.parse_args()
+
+        try:
+            jwt.decode(args['token'], app.config['SECRET_KEY'], algorithm='HS256')
+        except jwt.exceptions.ExpiredSignatureError:
+            return jsonify({'message': {'token': 'Token has expired'}})
+        except jwt.exceptions.DecodeError:
+            return jsonify({'message': {'token': 'Token is invalid'}})
+        except:
+            pass
+
+        return func(*args, **kwargs)
+
+    return validate_token
+
+
 class UserResourse(Resource):
-    """A restful resource for users"""
+    """A restful resource for users."""
+
     def put(self):
-        """Create a new user"""
+        """Create a new user."""
         pass
 
     def post(self):
-        """Modify an existing user"""
+        """Modify an existing user."""
         pass
 
     def delete(self):
-        """Delete an existing user"""
+        """Delete an existing user."""
         pass
 
 
@@ -45,11 +69,10 @@ token_parser.add_argument('password', required=True)
 
 
 class TokenResourse(Resource):
-    """A RESTful resource for authorization tokens"""
+    """A RESTful resource for authorization tokens."""
 
     def get(self):
-        """Get a JWT if the credentials are valid"""
-
+        """Get a JWT if the credentials are valid."""
         args = token_parser.parse_args()
         found_user = User.query.filter_by(username=args['username']).first()
 
@@ -120,9 +143,18 @@ api.add_resource(UserResourse, '/user')
 api.add_resource(TokenResourse, '/token')
 
 
+@app.route('/temp-testing', methods=['GET', 'POST'])
+@token_required
+def temp_testing():
+    """Test token_required decorator."""
+    return 'you should only see this if you have a valid token'
+
+
 @app.route('/is-valid', methods=['GET'])
 def is_valid():
     """
+    Demonstrate simple validation.
+
     A simple validation route for demo purposes, should be taken out (or maybe
     moved to the readme/wiki after we get some more infrastructure up
     """
@@ -150,7 +182,7 @@ def is_valid():
 @app.cli.command()
 def initdb():
     """
-    Create all SQLAlchemy tables
+    Create all SQLAlchemy tables.
 
     Run from terminal using 'flask initdb'.
     """
@@ -161,9 +193,9 @@ def initdb():
 @app.cli.command()
 def dropdb():
     """
-    Drop all tables in database
+    Drop all tables in database.
 
-    Run from terminal using 'flask dropdb'
+    Run from terminal using 'flask dropdb'.
     """
     db.drop_all()
     click.echo('Dropped all tables')
