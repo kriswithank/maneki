@@ -1,7 +1,6 @@
 """A RESTful api for authorizing users using Jason Web Tokens."""
 from datetime import datetime, timedelta
-from webargs import fields
-from webargs.flaskparser import parser
+from functools import wraps
 
 import click
 import jwt
@@ -9,17 +8,14 @@ from flask import Flask, request
 from flask.json import jsonify
 from flask_restful import Api, Resource, reqparse
 from flask_sqlalchemy import SQLAlchemy
-
+from webargs import fields
+from webargs.flaskparser import parser
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'notverysecure'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres@database/postgres'
 db = SQLAlchemy(app)
 api = Api(app)
-
-
-token_required_parser = reqparse.RequestParser()
-token_required_parser.add_argument('token', required=True)
 
 
 class ValidationError(Exception):
@@ -46,6 +42,7 @@ def handle_customerror(error):
     return error.get_response()
 
 
+# TODO: change name to validate_token
 def is_token_valid(token):
     """Return True if the token is valid, otherwise raise a ValidationError."""
     try:
@@ -60,28 +57,19 @@ def is_token_valid(token):
     return True
 
 
+# TODO: Must have better handlling for when token is not provided (return a json).
 token_args = {
     'token': fields.Str(required=True, validate=is_token_valid)
 }
 
 
 def token_required(func):
-    """Require decorated functions to have a valid token."""
+    """Require decorated function to be provided a valid token."""
+    @wraps(func)
     def validate_token(*args, **kwargs):
-        """Return JSON response if the token is invalid, otherwise, proceeds as normal."""
-        args = token_required_parser.parse_args()
-
-        try:
-            jwt.decode(args['token'], app.config['SECRET_KEY'], algorithm='HS256')
-        except jwt.exceptions.ExpiredSignatureError:
-            return jsonify({'message': {'token': 'Token has expired'}})
-        except jwt.exceptions.DecodeError:
-            return jsonify({'message': {'token': 'Token is invalid'}})
-        except:
-            pass
-
+        """Parse the args, validation is done during the parse."""
+        parser.parse(token_args, request)
         return func(*args, **kwargs)
-
     return validate_token
 
 
@@ -102,35 +90,6 @@ def foo_testing():
 def temp_testing():
     """Test token_required decorator."""
     return 'you should only see this if you have a valid token'
-
-
-@app.route('/is-valid', methods=['GET'])
-def is_valid():
-    """
-    Demonstrate simple validation.
-
-    A simple validation route for demo purposes, should be taken out (or maybe
-    moved to the readme/wiki after we get some more infrastructure up
-    """
-    # Request must be JSON
-    if not request.is_json:
-        return jsonify({'message': 'Request must be JSON'})
-
-    try:
-        token = request.get_json()['token']
-        print(str(token))
-        data = jwt.decode(token, app.config['SECRET_KEY'], algorithm='HS256')
-        return jsonify({'message': 'Success', 'data': data})
-    except jwt.exceptions.ExpiredSignatureError:
-        return jsonify({'message': 'Token has expired'})
-    except jwt.exceptions.DecodeError:
-        return jsonify({'message': 'Token is invalid'})
-    except KeyError:
-        return jsonify({'message': 'No token provided'})
-    except:
-        pass  # Ignore other exceptions
-
-    return jsonify({'message': 'A fatal error has occured'})
 
 
 class User(db.Model):
