@@ -1,5 +1,7 @@
 """A RESTful api for authorizing users using Jason Web Tokens."""
 from datetime import datetime, timedelta
+from webargs import fields
+from webargs.flaskparser import parser
 
 import click
 import jwt
@@ -25,6 +27,49 @@ class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(100))
     password = db.Column(db.String(1000))
+
+
+class ValidationError(Exception):
+    """
+    Represent errors that occur when parsing arguments.
+
+    Unraised errors will cause flask to return a jsonifyied response
+    of the payload.
+    """
+
+    def __init__(self, payload):
+        """Create a new ValidationError with the payload to jsonify."""
+        super().__init__()
+        self.payload = payload
+
+    def get_response(self):
+        """Get the jsonified response of the payload."""
+        return jsonify(self.payload)
+
+
+@app.errorhandler(ValidationError)
+def handle_customerror(error):
+    """Return a jsonified response of a ValidationError's payload when it raised and uncaught."""
+    return error.get_response()
+
+
+def is_token_valid(token):
+    """Return True if the token is valid, otherwise raise a ValidationError."""
+    try:
+        jwt.decode(token, app.config['SECRET_KEY'], algorithm='HS256')
+    except jwt.exceptions.ExpiredSignatureError:
+        raise ValidationError({'token': 'Token is expired'})
+    except jwt.exceptions.DecodeError:
+        raise ValidationError({'token': 'Token is invalid'})
+    except:
+        pass
+
+    return True
+
+
+token_args = {
+    'token': fields.Str(required=True, validate=is_token_valid)
+}
 
 
 def token_required(func):
@@ -82,7 +127,7 @@ class TokenResourse(Resource):
         if found_user.password != args['password']:
             return jsonify({'message': {'password': 'Incorrect password'}})
 
-        expiration = datetime.utcnow() + timedelta(hours=24)
+        expiration = datetime.utcnow() + timedelta(seconds=60)
         content = {
             'exp': expiration,
             'username': args['username'],
@@ -141,6 +186,13 @@ class TokenResourse(Resource):
 
 api.add_resource(UserResourse, '/user')
 api.add_resource(TokenResourse, '/token')
+
+
+@app.route('/foo-testing', methods=['GET', 'POST'])
+def foo_testing():
+    """Test out the webargs module."""
+    args = parser.parse(token_args, request)
+    return "your token was: {}\n".format(args['token'])
 
 
 @app.route('/temp-testing', methods=['GET', 'POST'])
