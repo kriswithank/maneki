@@ -43,7 +43,15 @@ def handle_error(error):
     raise JSONError(error.messages)
 
 
-def is_token_valid(token):
+class User(db.Model):
+    """A simple model representation of a user."""
+
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(100))
+    password = db.Column(db.String(1000))
+
+
+def is_token_valid(token: str) -> bool:
     """Return True iff the token is valid, otherwise raise a ValidationError."""
     try:
         jwt.decode(token, app.config['SECRET_KEY'], algorithm='HS256')
@@ -55,8 +63,27 @@ def is_token_valid(token):
     return True
 
 
+def does_user_exist(target_user: User) -> bool:
+    """Return if the target user exists in the database."""
+    found_user = User.query.filter_by(username=target_user.username).first()
+
+    if found_user is None:
+        raise ValidationError('No such user exists')
+
+
+def is_password_correct(user: User, given_password: str) -> bool:
+    """Return if the given password is correct for the given user."""
+    return user.password == given_password
+
+
 token_args = {
     'token': fields.Str(required=True, validate=is_token_valid)
+}
+
+
+credential_args = {
+    'username': fields.Str(required=True),
+    'password': fields.Str(required=True),
 }
 
 
@@ -87,14 +114,6 @@ def foo_testing():
 def temp_testing():
     """Test token_required decorator."""
     return 'you should only see this if you have a valid token'
-
-
-class User(db.Model):
-    """A simple model representation of a user."""
-
-    id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(100))
-    password = db.Column(db.String(1000))
 
 
 class UserResourse(Resource):
