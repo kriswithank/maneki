@@ -6,7 +6,7 @@ import click
 import jwt
 from flask import Flask, request
 from flask.json import jsonify
-from flask_restful import Api, Resource, reqparse
+from flask_restful import Api, Resource
 from flask_sqlalchemy import SQLAlchemy
 from webargs import fields, ValidationError
 from webargs.flaskparser import parser
@@ -63,11 +63,14 @@ def is_token_valid(token: str) -> bool:
     return True
 
 
-def does_user_exist(target_user: User) -> bool:
-    """Return if the target user exists in the database."""
-    found_user = User.query.filter_by(username=target_user.username).first()
+def get_user(target_user_name: str) -> User:
+    """Return the User object with the given username if it exists, None otherwise."""
+    return User.query.filter_by(username=target_user_name).first()
 
-    if found_user is None:
+
+def does_user_exist(target_user_name: str) -> bool:
+    """Return if the target user exists in the database."""
+    if get_user(target_user_name) is None:
         raise ValidationError('No such user exists')
 
 
@@ -76,13 +79,29 @@ def is_password_correct(user: User, given_password: str) -> bool:
     return user.password == given_password
 
 
+def credential_args_validator(args: dict) -> bool:
+    """
+    Return if the given credential_args are valid, raise a ValidationError if not.
+
+    Only really checks the password, it is assumed that the user has already
+    been checked for existance.
+
+    Should be used when parsing the args like so:
+        parser.parse(credential_args, validate=credential_args_validator)
+    """
+    target_user = get_user(args['username'])
+    if not is_password_correct(target_user, args['password']):
+        raise ValidationError({'password': ['Password is incorrect']})
+    return True
+
+
 token_args = {
     'token': fields.Str(required=True, validate=is_token_valid)
 }
 
 
 credential_args = {
-    'username': fields.Str(required=True),
+    'username': fields.Str(required=True, validate=does_user_exist),
     'password': fields.Str(required=True),
 }
 
@@ -95,18 +114,6 @@ def token_required(func):
         parser.parse(token_args, request)
         return func(*args, **kwargs)
     return validate_token
-
-
-token_parser = reqparse.RequestParser(bundle_errors=True)
-token_parser.add_argument('username', required=True)
-token_parser.add_argument('password', required=True)
-
-
-@app.route('/foo-testing', methods=['GET', 'POST'])
-def foo_testing():
-    """Test out the webargs module."""
-    args = parser.parse(token_args, request)
-    return "your token was: {}\n".format(args['token'])
 
 
 @app.route('/temp-testing', methods=['GET', 'POST'])
@@ -137,14 +144,7 @@ class TokenResourse(Resource):
 
     def get(self):
         """Get a JWT if the credentials are valid."""
-        args = token_parser.parse_args()
-        found_user = User.query.filter_by(username=args['username']).first()
-
-        if found_user is None:
-            return jsonify({'message': {'username': 'No such user exists'}})
-
-        if found_user.password != args['password']:
-            return jsonify({'message': {'password': 'Incorrect password'}})
+        args = parser.parse(credential_args, validate=credential_args_validator)
 
         expiration = datetime.utcnow() + timedelta(seconds=60)
         content = {
