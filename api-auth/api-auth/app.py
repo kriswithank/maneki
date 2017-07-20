@@ -8,7 +8,7 @@ from flask import Flask, request
 from flask.json import jsonify
 from flask_restful import Api, Resource, reqparse
 from flask_sqlalchemy import SQLAlchemy
-from webargs import fields
+from webargs import fields, ValidationError
 from webargs.flaskparser import parser
 
 app = Flask(__name__)
@@ -18,13 +18,8 @@ db = SQLAlchemy(app)
 api = Api(app)
 
 
-class ValidationError(Exception):
-    """
-    Represent errors that occur when parsing arguments.
-
-    Unraised errors will cause flask to return a jsonifyied response
-    of the payload.
-    """
+class JSONError(Exception):
+    """Represent errors that have a payload that should be a jsonified response."""
 
     def __init__(self, payload):
         """Create a new ValidationError with the payload to jsonify."""
@@ -36,28 +31,30 @@ class ValidationError(Exception):
         return jsonify(self.payload)
 
 
-@app.errorhandler(ValidationError)
-def handle_customerror(error):
+@app.errorhandler(JSONError)
+def handle_jsonerror(error):
     """Return a jsonified response of a ValidationError's payload when it raised and uncaught."""
     return error.get_response()
 
 
-# TODO: change name to validate_token
+@parser.error_handler
+def handle_error(error):
+    """Handle validations errors by just converting them to a JSONError."""
+    raise JSONError(error.messages)
+
+
 def is_token_valid(token):
-    """Return True if the token is valid, otherwise raise a ValidationError."""
+    """Return True iff the token is valid, otherwise raise a ValidationError."""
     try:
         jwt.decode(token, app.config['SECRET_KEY'], algorithm='HS256')
     except jwt.exceptions.ExpiredSignatureError:
-        raise ValidationError({'token': 'Token is expired'})
+        raise ValidationError('Token is expired')
     except jwt.exceptions.DecodeError:
-        raise ValidationError({'token': 'Token is invalid'})
-    except:
-        pass
+        raise ValidationError('Token is invalid')
 
     return True
 
 
-# TODO: Must have better handlling for when token is not provided (return a json).
 token_args = {
     'token': fields.Str(required=True, validate=is_token_valid)
 }
