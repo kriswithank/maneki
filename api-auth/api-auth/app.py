@@ -9,7 +9,9 @@ from flask.json import jsonify
 from flask_restful import Api, Resource
 from flask_sqlalchemy import SQLAlchemy
 from webargs import fields, ValidationError
-from webargs.flaskparser import parser
+from webargs.flaskparser import parser, use_args
+from marshmallow import (fields as m_fields, Schema, validates,
+                         validates_schema, ValidationError as m_ValidationError)
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'notverysecure'
@@ -63,47 +65,39 @@ def is_token_valid(token: str) -> bool:
     return True
 
 
-def get_user(target_user_name: str) -> User:
-    """Return the User object with the given username if it exists, None otherwise."""
-    return User.query.filter_by(username=target_user_name).first()
-
-
-def does_user_exist(target_user_name: str) -> bool:
-    """Return if the target user exists in the database."""
-    if get_user(target_user_name) is None:
-        raise ValidationError('No such user exists')
-
-
-def is_password_correct(user: User, given_password: str) -> bool:
-    """Return if the given password is correct for the given user."""
-    return user.password == given_password
-
-
-def credential_args_validator(args: dict) -> bool:
-    """
-    Return if the given credential_args are valid, raise a ValidationError if not.
-
-    Only really checks the password, it is assumed that the user has already
-    been checked for existance.
-
-    Should be used when parsing the args like so:
-        parser.parse(credential_args, validate=credential_args_validator)
-    """
-    target_user = get_user(args['username'])
-    if not is_password_correct(target_user, args['password']):
-        raise ValidationError({'password': ['Password is incorrect']})
-    return True
-
-
 token_args = {
     'token': fields.Str(required=True, validate=is_token_valid)
 }
 
 
-credential_args = {
-    'username': fields.Str(required=True, validate=does_user_exist),
-    'password': fields.Str(required=True),
-}
+class CredentialSchema(Schema):
+    """Marhmallow Schema for validating user credentials."""
+
+    class Meta:
+        """Enforce required and validated fields by enabling strict evaluation."""
+
+        strict = True
+
+    username = m_fields.Str(required=True)
+    password = m_fields.Str(required=True)
+
+    @validates('username')
+    def user_must_exist(self, value: str) -> None:
+        """Query the database to see if a user with the given username exists."""
+        target_user = User.query.filter_by(username=value).first()
+        if target_user is None:
+            raise m_ValidationError('No such user exists.')
+
+    @validates_schema(skip_on_field_errors=True)
+    def password_is_correct(self, data):
+        """Check that the password is correct for the given user.
+
+        Since this is only run if all field validations pass, we know that target_user
+        is not None.
+        """
+        target_user = User.query.filter_by(username=data['username']).first()
+        if data['password'] != target_user.password:
+            raise m_ValidationError('Password is incorrect.', ['password'])
 
 
 def token_required(func):
@@ -114,13 +108,6 @@ def token_required(func):
         parser.parse(token_args, request)
         return func(*args, **kwargs)
     return validate_token
-
-
-@app.route('/temp-testing', methods=['GET', 'POST'])
-@token_required
-def temp_testing():
-    """Test token_required decorator."""
-    return 'you should only see this if you have a valid token'
 
 
 class UserResourse(Resource):
@@ -142,10 +129,9 @@ class UserResourse(Resource):
 class TokenResourse(Resource):
     """A RESTful resource for authorization tokens."""
 
-    def get(self):
+    @use_args(CredentialSchema())
+    def get(self, args):
         """Get a JWT if the credentials are valid."""
-        args = parser.parse(credential_args, validate=credential_args_validator)
-
         expiration = datetime.utcnow() + timedelta(seconds=60)
         content = {
             'exp': expiration,
