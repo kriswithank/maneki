@@ -116,7 +116,7 @@ class UserResourse(Resource):
         pass
 
     def post(self):
-        """Modify an existing user."""
+        """Change an existing user's password."""
         pass
 
     def delete(self):
@@ -148,47 +148,6 @@ class TokenResourse(Resource):
 
 api.add_resource(UserResourse, '/user')
 api.add_resource(TokenResourse, '/token')
-
-
-# class UserResource(Resource):
-#     """A restful resource for users"""
-#     def post(self):
-#         """Change a user's password"""
-#         # Request must be JSON
-#         if not request.is_json:
-#             return jsonify({'message': 'Request must be JSON'})
-
-#         try:
-#             token = request.get_json()['token']
-#             token_data = jwt.decode(token, app.config['SECRET_KEY'], algorithm='HS256')
-
-#             print('got token and token_data')
-
-#             username = token_data['username']
-#             new_password = request.get_json()['new_password']
-
-#             print('got username and new password from request')
-
-#             found_user = User.query.filter_by(username=username).first()
-
-#             if found_user is None:
-#                 return jsonify({'message': 'Failure, user does not exist'})
-
-#             found_user.password = new_password
-#             db.session.add(found_user)
-#             db.session.commit(found_user)
-
-#             return jsonify({'message': 'Success, password changed'})
-#         except jwt.exceptions.ExpiredSignatureError:
-#             return jsonify({'message': 'Token has expired'})
-#         except jwt.exceptions.DecodeError:
-#             return jsonify({'message': 'Token is invalid'})
-#         except KeyError:
-#             return jsonify({'message': 'No token provided'})
-#         except:
-#             pass  # Ignore other exceptions
-
-#         return jsonify({'message': 'A fatal error has occured'})
 
 
 @app.cli.command()
