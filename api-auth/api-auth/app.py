@@ -1,17 +1,14 @@
 """A RESTful api for authorizing users using Jason Web Tokens."""
 from datetime import datetime, timedelta
-from functools import wraps
 
 import click
 import jwt
-from flask import Flask, request
+from flask import Flask
 from flask.json import jsonify
 from flask_restful import Api, Resource
 from flask_sqlalchemy import SQLAlchemy
-from webargs import fields, ValidationError
 from webargs.flaskparser import parser, use_args
-from marshmallow import (fields as m_fields, Schema, validates,
-                         validates_schema, ValidationError as m_ValidationError)
+from marshmallow import fields, Schema, validates, validates_schema, ValidationError
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'notverysecure'
@@ -53,21 +50,25 @@ class User(db.Model):
     password = db.Column(db.String(1000))
 
 
-def is_token_valid(token: str) -> bool:
-    """Return True iff the token is valid, otherwise raise a ValidationError."""
-    try:
-        jwt.decode(token, app.config['SECRET_KEY'], algorithm='HS256')
-    except jwt.exceptions.ExpiredSignatureError:
-        raise ValidationError('Token is expired')
-    except jwt.exceptions.DecodeError:
-        raise ValidationError('Token is invalid')
+class ValidTokenSchema(Schema):
+    """Marshmallow schema for validating tokens."""
 
-    return True
+    class Meta:
+        """Enforce required and validated fields by enabling strict evaluation."""
 
+        strict = True
 
-token_args = {
-    'token': fields.Str(required=True, validate=is_token_valid)
-}
+    token = fields.Str(required=True)
+
+    @validates('token')
+    def token_is_valid(self, value: str) -> None:
+        """Return True iff the token is valid, otherwise raise a ValidationError."""
+        try:
+            jwt.decode(value, app.config['SECRET_KEY'], algorithm='HS256')
+        except jwt.exceptions.ExpiredSignatureError:
+            raise ValidationError('Token is expired.')
+        except jwt.exceptions.DecodeError:
+            raise ValidationError('Token is invalid.')
 
 
 class CredentialSchema(Schema):
@@ -78,15 +79,15 @@ class CredentialSchema(Schema):
 
         strict = True
 
-    username = m_fields.Str(required=True)
-    password = m_fields.Str(required=True)
+    username = fields.Str(required=True)
+    password = fields.Str(required=True)
 
     @validates('username')
-    def user_must_exist(self, value: str) -> None:
+    def user_exists(self, value: str) -> None:
         """Query the database to see if a user with the given username exists."""
         target_user = User.query.filter_by(username=value).first()
         if target_user is None:
-            raise m_ValidationError('No such user exists.')
+            raise ValidationError('No such user exists.')
 
     @validates_schema(skip_on_field_errors=True)
     def password_is_correct(self, data):
@@ -97,17 +98,14 @@ class CredentialSchema(Schema):
         """
         target_user = User.query.filter_by(username=data['username']).first()
         if data['password'] != target_user.password:
-            raise m_ValidationError('Password is incorrect.', ['password'])
+            raise ValidationError('Password is incorrect.', ['password'])
 
 
-def token_required(func):
-    """Require decorated function to be provided a valid token."""
-    @wraps(func)
-    def validate_token(*args, **kwargs):
-        """Parse the args, validation is done during the parse."""
-        parser.parse(token_args, request)
-        return func(*args, **kwargs)
-    return validate_token
+@app.route('/foo-route')
+@use_args(ValidTokenSchema())
+def foo_route(data):
+    """Test 'token-required' decorator."""
+    return "you should only see this if you have a valid token."
 
 
 class UserResourse(Resource):
