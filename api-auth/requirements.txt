@@ -1,6 +1,9 @@
 flask
 flask_restful
+flask-shell-ipython
 flask_sqlalchemy
+gnureadline
 psycopg2
+marshmallow
 pyjwt
 webargs
