@@ -103,7 +103,7 @@ class CredentialSchema(Schema):
 
 @app.route('/foo-route')
 @use_args(ValidTokenSchema())
-def foo_route(data):
+def foo_route(data):  # pylint: disable=unused-argument
     """Test 'token-required' decorator."""
     return "you should only see this if you have a valid token."
 
