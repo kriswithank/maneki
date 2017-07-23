@@ -11,6 +11,7 @@ from webargs.flaskparser import parser, use_args
 
 from api_auth.commands import configure_app_cli
 from api_auth.extensions import api, db
+from api_auth.models import User
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'notverysecure'
@@ -40,14 +41,6 @@ def handle_jsonerror(error):
 def handle_error(error):
     """Handle validations errors by just converting them to a JSONError."""
     raise JSONError(error.messages)
-
-
-class User(db.Model):
-    """A simple model representation of a user."""
-
-    id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(100))
-    password = db.Column(db.String(1000))
 
 
 class ValidTokenSchema(Schema):
