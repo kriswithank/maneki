@@ -5,10 +5,10 @@ services:
     ports:
       - 5432:5432
 
-  api-auth:
+  api_auth:
     command: 'flask run --host=0.0.0.0 --port=80'
     volumes:
-      - ./api-auth/api-auth:/app/src
+      - ./api_auth:/app/api_auth
     ports:
       - 5002:80
 
