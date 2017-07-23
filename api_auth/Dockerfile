@@ -3,7 +3,6 @@ FROM python:3.3.6-wheezy
 EXPOSE 80
 
 ENV FLASK_APP "api_auth.app"
-ENV FLASK_DEBUG "true"
 
 WORKDIR /app
 
