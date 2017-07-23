@@ -152,7 +152,7 @@ api.add_resource(TokenResourse, '/token')
 db.init_app(app)
 api.init_app(app)
 
-configure_app_cli(app, db)
+configure_app_cli(app)
 
 
 if __name__ == '__main__':
