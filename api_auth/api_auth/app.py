@@ -1,7 +1,6 @@
 """A RESTful api for authorizing users using Jason Web Tokens."""
 from datetime import datetime, timedelta
 
-import click
 import jwt
 from flask import Flask
 from flask.json import jsonify
@@ -9,6 +8,7 @@ from flask_restful import Api, Resource
 from flask_sqlalchemy import SQLAlchemy
 from webargs.flaskparser import parser, use_args
 from marshmallow import fields, Schema, validates, validates_schema, ValidationError
+from api_auth.commands import configure_app_cli
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'notverysecure'
@@ -150,26 +150,7 @@ api.add_resource(UserResourse, '/user')
 api.add_resource(TokenResourse, '/token')
 
 
-@app.cli.command()
-def initdb():
-    """
-    Create all SQLAlchemy tables.
-
-    Run from terminal using 'flask initdb'.
-    """
-    db.create_all()
-    click.echo('Created all tables')
-
-
-@app.cli.command()
-def dropdb():
-    """
-    Drop all tables in database.
-
-    Run from terminal using 'flask dropdb'.
-    """
-    db.drop_all()
-    click.echo('Dropped all tables')
+configure_app_cli(app, db)
 
 
 if __name__ == '__main__':
