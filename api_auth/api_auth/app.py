@@ -4,17 +4,17 @@ from datetime import datetime, timedelta
 import jwt
 from flask import Flask
 from flask.json import jsonify
-from flask_restful import Api, Resource
-from flask_sqlalchemy import SQLAlchemy
+from flask_restful import Resource
+from marshmallow import (Schema, ValidationError, fields, validates,
+                         validates_schema)
 from webargs.flaskparser import parser, use_args
-from marshmallow import fields, Schema, validates, validates_schema, ValidationError
+
 from api_auth.commands import configure_app_cli
+from api_auth.extensions import api, db
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'notverysecure'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres@database/postgres'
-db = SQLAlchemy(app)
-api = Api(app)
 
 
 class JSONError(Exception):
@@ -149,6 +149,8 @@ class TokenResourse(Resource):
 api.add_resource(UserResourse, '/user')
 api.add_resource(TokenResourse, '/token')
 
+db.init_app(app)
+api.init_app(app)
 
 configure_app_cli(app, db)
 
