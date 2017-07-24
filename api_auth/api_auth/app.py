@@ -12,7 +12,7 @@ from webargs.flaskparser import parser, use_args
 from api_auth.commands import configure_app_cli
 from api_auth.extensions import api, db
 from api_auth.models import User
-from api_auth.utils import JSONError
+from api_auth.utils import JSONError, ValidTokenSchema
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'notverysecure'
@@ -29,27 +29,6 @@ def handle_jsonerror(error):
 def handle_error(error):
     """Handle validations errors by just converting them to a JSONError."""
     raise JSONError(error.messages)
-
-
-class ValidTokenSchema(Schema):
-    """Marshmallow schema for validating tokens."""
-
-    class Meta:
-        """Enforce required and validated fields by enabling strict evaluation."""
-
-        strict = True
-
-    token = fields.Str(required=True)
-
-    @validates('token')
-    def token_is_valid(self, value: str) -> None:
-        """Return True iff the token is valid, otherwise raise a ValidationError."""
-        try:
-            jwt.decode(value, app.config['SECRET_KEY'], algorithm='HS256')
-        except jwt.exceptions.ExpiredSignatureError:
-            raise ValidationError('Token is expired.')
-        except jwt.exceptions.DecodeError:
-            raise ValidationError('Token is invalid.')
 
 
 class CredentialSchema(Schema):
