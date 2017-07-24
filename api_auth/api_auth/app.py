@@ -12,23 +12,11 @@ from webargs.flaskparser import parser, use_args
 from api_auth.commands import configure_app_cli
 from api_auth.extensions import api, db
 from api_auth.models import User
+from api_auth.utils import JSONError
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'notverysecure'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres@database/postgres'
-
-
-class JSONError(Exception):
-    """Represent errors that have a payload that should be a jsonified response."""
-
-    def __init__(self, payload):
-        """Create a new ValidationError with the payload to jsonify."""
-        super().__init__()
-        self.payload = payload
-
-    def get_response(self):
-        """Get the jsonified response of the payload."""
-        return jsonify(self.payload)
 
 
 @app.errorhandler(JSONError)
