@@ -12,7 +12,7 @@ from webargs.flaskparser import parser, use_args
 from api_auth.commands import configure_app_cli
 from api_auth.extensions import api, db
 from api_auth.models import User
-from api_auth.utils import JSONError, ValidTokenSchema
+from api_auth.utils import JSONError, token_required
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'notverysecure'
@@ -62,10 +62,11 @@ class CredentialSchema(Schema):
 
 
 @app.route('/foo-route')
-@use_args(ValidTokenSchema())
-def foo_route(data):  # pylint: disable=unused-argument
+@token_required
+@use_args(CredentialSchema())
+def foo_route(data):
     """Test 'token-required' decorator."""
-    return "you should only see this if you have a valid token."
+    return str(data)
 
 
 class UserResourse(Resource):

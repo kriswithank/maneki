@@ -1,7 +1,10 @@
 """Assorted general utilities."""
-from flask import jsonify, current_app
-from marshmallow import Schema, ValidationError, fields, validates
+from functools import wraps
+
 import jwt
+from flask import current_app, jsonify, request
+from marshmallow import Schema, ValidationError, fields, validates
+from webargs.flaskparser import parser
 
 
 class JSONError(Exception):
@@ -36,3 +39,13 @@ class ValidTokenSchema(Schema):
             raise ValidationError('Token is expired.')
         except jwt.exceptions.DecodeError:
             raise ValidationError('Token is invalid.')
+
+
+def token_required(func):
+    """Decorate functions that require a valid token with this."""
+    @wraps(func)
+    def test_for_valid_token(*args, **kwargs):
+        """Use ValidTokenSchema to validate token and discard generated args."""
+        parser.parse(ValidTokenSchema(), request)
+        return func(*args, **kwargs)
+    return test_for_valid_token
