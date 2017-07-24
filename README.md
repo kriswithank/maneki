@@ -16,17 +16,20 @@ You can drop all of the tables in the database with
 
 ```
 docker-compose run api-finances flask dropdb
+docker-compose run api_auth flask dropdb
 ```
 
 And you can create empty tables in the database with
 
 ```
 docker-compose run api-finances flask initdb
+docker-compose run api_auth flask initdb
 ```
 
-Currently only the api-finances service talks to the database, but
-in the future, every service should have it's own database and so you
-would have to repeat these commands on a per-service basis.
+Currently only the api-finances and api_auth service talks to the database and
+the currently share the same database, but in the future, every service should
+have it's own database and so you would have to repeat these commands on a
+per-service basis.
 
 ---
 
