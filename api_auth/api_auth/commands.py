@@ -4,7 +4,7 @@ import click
 from api_auth.extensions import db
 
 
-def configure_app_cli(app):
+def register_commands(app):
     """Add comands to the flask app."""
     # pylint: disable=unused-variable
 
