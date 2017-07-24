@@ -1,11 +1,11 @@
-"""A RESTful api for authorizing users using Jason Web Tokens."""
+"""The flask app and app configuration for api_auth."""
 from flask import Flask
 from webargs.flaskparser import parser, use_args
 
 from api_auth.commands import register_commands
-from api_auth.extensions import api, db
+from api_auth.extensions import api, register_extensions
+from api_auth.resources import CredentialSchema, register_resources
 from api_auth.utils import JSONError, token_required
-from api_auth.resources import UserResourse, TokenResourse, CredentialSchema
 
 
 app = Flask(__name__)
@@ -21,7 +21,11 @@ def handle_jsonerror(error):
 
 @parser.error_handler
 def handle_error(error):
-    """Handle validations errors by just converting them to a JSONError."""
+    """
+    Handle webargs ValidationErrors by converting them to a JSONError.
+
+    This will jsonify the payload.
+    """
     raise JSONError(error.messages)
 
 
@@ -33,12 +37,8 @@ def foo_route(data):
     return str(data)
 
 
-api.add_resource(UserResourse, '/user')
-api.add_resource(TokenResourse, '/token')
-
-db.init_app(app)
-api.init_app(app)
-
+register_resources(api)
+register_extensions(app)
 register_commands(app)
 
 

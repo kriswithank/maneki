@@ -42,7 +42,7 @@ class ValidTokenSchema(Schema):
 
 
 def token_required(func):
-    """Decorate functions that require a valid token with this."""
+    """Decorate functions requiring a valid token with this."""
     @wraps(func)
     def test_for_valid_token(*args, **kwargs):
         """Use ValidTokenSchema to validate token and discard generated args."""

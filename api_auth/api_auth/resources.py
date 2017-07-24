@@ -9,13 +9,11 @@ from marshmallow import (Schema, ValidationError, fields, validates,
                          validates_schema)
 from webargs.flaskparser import use_args
 
-from api_auth.extensions import api, db
 from api_auth.models import User
-from api_auth.utils import JSONError, token_required
 
 
 class CredentialSchema(Schema):
-    """Marhmallow Schema for validating user credentials."""
+    """Schema for validating user credentials."""
 
     class Meta:
         """Enforce required and validated fields by enabling strict evaluation."""
@@ -34,7 +32,8 @@ class CredentialSchema(Schema):
 
     @validates_schema(skip_on_field_errors=True)
     def password_is_correct(self, data):
-        """Check that the password is correct for the given user.
+        """
+        Check that the password is correct for the given user.
 
         Since this is only run if all field validations pass, we know that target_user
         is not None.
@@ -80,3 +79,9 @@ class TokenResourse(Resource):
         return jsonify({
             'message': 'Success',
             'token': token})
+
+
+def register_resources(api):
+    """Register Flask-RESTful resources to the given api."""
+    api.add_resource(UserResourse, '/user')
+    api.add_resource(TokenResourse, '/token')
