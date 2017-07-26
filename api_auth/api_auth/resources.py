@@ -2,13 +2,13 @@
 from datetime import datetime, timedelta
 
 import jwt
-from flask import current_app
 from flask.json import jsonify
 from flask_restful import Resource
 from marshmallow import (Schema, ValidationError, fields, validates,
                          validates_schema)
 from webargs.flaskparser import use_args
 
+from api_auth import const
 from api_auth.models import User
 
 
@@ -73,7 +73,7 @@ class TokenResourse(Resource):
 
         # Recall that encode returns a bytes object, so we will have to encode it
         # to be able to jsonify the token.
-        token_bytes = jwt.encode(content, current_app.config['SECRET_KEY'], algorithm='HS256')
+        token_bytes = jwt.encode(content, const.SECRET_KEY, algorithm='HS256')
         token = token_bytes.decode('UTF-8')
 
         return jsonify({

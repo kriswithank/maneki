@@ -2,6 +2,7 @@
 from flask import Flask
 from webargs.flaskparser import parser, use_args
 
+from api_auth import const
 from api_auth.commands import register_commands
 from api_auth.extensions import api, register_extensions
 from api_auth.resources import CredentialSchema, register_resources
@@ -9,8 +10,8 @@ from api_auth.utils import JSONError, token_required
 
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'notverysecure'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres@database/postgres'
+app.config['SECRET_KEY'] = const.SECRET_KEY
+app.config['SQLALCHEMY_DATABASE_URI'] = const.DATABASE_URI
 
 
 @app.errorhandler(JSONError)
