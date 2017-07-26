@@ -1,7 +1,9 @@
 """Cli commands for api_auth."""
 import click
+from sqlalchemy_utils import create_database, database_exists
 
 from api_auth.extensions import db
+from api_auth import const
 
 
 def register_commands(app):
@@ -22,8 +24,10 @@ def register_commands(app):
 
     @app.cli.command()
     def initdb():
-        """Create all SQLAlchemy tables."""
-        db.create_all()
+        """Create the database and all SQLAlchemy tables if they do not exist."""
+        if not database_exists(const.DATABASE_URI):
+            create_database(const.DATABASE_URI)
+        db.create_all()  # create the tables
         click.echo('Created all tables')
 
     @app.cli.command()
