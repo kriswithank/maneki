@@ -3,7 +3,7 @@ import click
 from sqlalchemy_utils import create_database, database_exists
 
 from api_auth.extensions import db
-from api_auth import const
+from flask import current_app
 
 
 def register_commands(app):
@@ -25,8 +25,8 @@ def register_commands(app):
     @app.cli.command()
     def initdb():
         """Create the database and all SQLAlchemy tables if they do not exist."""
-        if not database_exists(const.DATABASE_URI):
-            create_database(const.DATABASE_URI)
+        if not database_exists(current_app.config['SQLALCHEMY_DATABASE_URI']):
+            create_database(current_app.config['SQLALCHEMY_DATABASE_URI'])
         db.create_all()  # create the tables
         click.echo('Created all tables')
 
