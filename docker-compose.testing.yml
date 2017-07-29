@@ -1,0 +1,24 @@
+version: '3'
+
+services:
+  database:
+    ports:
+      - 9888:5432
+
+  api_auth:
+    command: 'flask run --host=0.0.0.0 --port=80'
+    volumes:
+      - ./api_auth:/app/api_auth
+    environment:
+      - FLASK_DEBUG=1
+      - FLASK_CONFIG_OVERRIDE=/app/api_auth/config/test.cfg
+
+  api-finances:
+    command: 'flask run --host=0.0.0.0 --port=80'
+    volumes:
+      - ./api-finances/api-finances:/app/src
+
+  simplepages:
+    command: 'flask run --host=0.0.0.0 --port=80'
+    volumes:
+      - ./simplepages/simplepages:/app/src
