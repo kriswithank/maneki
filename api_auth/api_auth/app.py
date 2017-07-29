@@ -1,16 +1,17 @@
-"""The flask app and app configuration for api_auth."""
+"""The api_auth flask app factory."""
 from os import environ
 
 from flask import Flask
 from webargs.flaskparser import parser, use_args
 
+from api_auth import const
 from api_auth.commands import register_commands
 from api_auth.extensions import api, register_extensions
 from api_auth.resources import CredentialSchema, register_resources
 from api_auth.utils import JSONError, token_required
 
 
-def create_app():
+def create_app(config_override_file=None):
     """
     Create a flask app for api_auth.
 
@@ -26,12 +27,12 @@ def create_app():
     app = Flask(__name__)
 
     # Read in the base config (will read from '../cofnig/base.cfg' if FLASK_BASE_CONFIG isn't set
-    environ.setdefault('FLASK_BASE_CONFIG', '../config/base.cfg')
+    environ.setdefault('FLASK_BASE_CONFIG', const.CONFIG_DEFAULT_BASE)
     app.config.from_envvar('FLASK_BASE_CONFIG')
 
-    # Load in additional configuration overrides if FLASK_CONFIG_OVERRIDE is set
-    if 'FLASK_CONFIG_OVERRIDE' in environ:
-        app.config.from_envvar('FLASK_CONFIG_OVERRIDE')
+    # Load in additional configuration overrides if provided
+    if config_override_file is not None:
+        app.config.from_pyfile(config_override_file)
 
     @app.errorhandler(JSONError)
     def handle_jsonerror(error):
@@ -51,15 +52,11 @@ def create_app():
     register_extensions(app)
     register_commands(app)
 
+    @app.route('/foo-route')
+    @token_required
+    @use_args(CredentialSchema())
+    def foo_route(data):
+        """Test 'token-required' decorator."""
+        return str(data)
+
     return app
-
-
-app = create_app()
-
-
-@app.route('/foo-route')
-@token_required
-@use_args(CredentialSchema())
-def foo_route(data):
-    """Test 'token-required' decorator."""
-    return str(data)
