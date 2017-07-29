@@ -9,6 +9,7 @@ services:
 
 before_install:
 - docker-compose build
+- docker-compose -f docker-compose.yml -f docker-compose.testing.yml run api_auth flask initdb
 
 script:
 - docker-compose -f docker-compose.yml -f docker-compose.testing.yml run api_auth pytest api_auth/api_auth/tests -v
