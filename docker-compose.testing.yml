@@ -1,6 +1,10 @@
 version: '3'
 
 services:
+  database:
+    ports:
+      - 9888:5432
+
   api_auth:
     command: 'flask run --host=0.0.0.0 --port=80'
     volumes:
