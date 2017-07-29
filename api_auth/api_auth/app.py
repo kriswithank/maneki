@@ -1,4 +1,4 @@
-"""The flask app and app configuration for api_auth."""
+"""The api_auth flask app factory."""
 from os import environ
 
 from flask import Flask
