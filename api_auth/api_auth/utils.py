@@ -2,11 +2,9 @@
 from functools import wraps
 
 import jwt
-from flask import jsonify, request
+from flask import jsonify, request, current_app
 from marshmallow import Schema, ValidationError, fields, validates
 from webargs.flaskparser import parser
-
-from api_auth import const
 
 
 class JSONError(Exception):
@@ -36,7 +34,7 @@ class ValidTokenSchema(Schema):
     def token_is_valid(self, value: str) -> None:
         """Return True iff the token is valid, otherwise raise a ValidationError."""
         try:
-            jwt.decode(value, const.SECRET_KEY, algorithm='HS256')
+            jwt.decode(value, current_app.config['SECRET_KEY'], algorithm='HS256')
         except jwt.exceptions.ExpiredSignatureError:
             raise ValidationError('Token is expired.')
         except jwt.exceptions.DecodeError:
