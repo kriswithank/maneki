@@ -3,8 +3,10 @@ flask_restful
 flask-shell-ipython
 flask_sqlalchemy
 gnureadline
+ipdb
 marshmallow
 psycopg2
 pyjwt
+pytest
 sqlalchemy-utils
 webargs
