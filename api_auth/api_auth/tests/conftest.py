@@ -5,10 +5,12 @@ import pytest
 # pylint: disable=redefined-outer-name
 
 
-@pytest.fixture()
+@pytest.fixture(scope='session')
 def app():
     """Return an instance of the flask app configured with test env variables."""
-    return auth_app.create_app(const.CONFIG_TESTING)
+    app = auth_app.create_app(const.CONFIG_TESTING)
+    with app.app_context():
+        yield app
 
 
 @pytest.fixture
