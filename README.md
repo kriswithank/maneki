@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/kriswithank/maneki.svg?branch=master)](https://travis-ci.org/kriswithank/maneki)
+
 # maneki
 A modular website for personal use
 
