@@ -13,6 +13,8 @@ before_install:
 - sudo apt-get update
 - sudo apt-get -y install docker-ce
 - docker-compose build
+- docker-compose run database
+- sleep 20
 - docker-compose -f docker-compose.yml -f docker-compose.testing.yml run api_auth flask initdb
 
 script:
