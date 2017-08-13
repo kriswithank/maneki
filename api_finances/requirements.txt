@@ -1,5 +1,6 @@
 flask
 flask_restful
 flask_sqlalchemy
-gunicorn
 psycopg2
+sqlalchemy-utils
+gunicorn
