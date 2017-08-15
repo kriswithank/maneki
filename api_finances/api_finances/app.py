@@ -3,16 +3,15 @@ Contains common components for api-finances
 
 Such as: app, db, api
 """
-import click
 from flask import Flask
 from flask.json import jsonify
-from flask_restful import Api, Resource
-from flask_sqlalchemy import SQLAlchemy
+from flask_restful import Resource
+
+from api_finances.extensions import db, api, register_extensions
+from api_finances.commands import register_commands
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres@database/postgres'
-db = SQLAlchemy(app)
-api = Api(app)
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres@database/finances'
 
 
 class User(db.Model):
@@ -44,27 +43,8 @@ class HelloWorld(Resource):
 
 api.add_resource(HelloWorld, '/')
 
-
-@app.cli.command()
-def initdb():
-    """
-    A command to Initalize SQLAlchemy databases
-
-    Run with 'flask initdb'.
-    """
-    db.create_all()
-    click.echo('Created all tables')
-
-
-@app.cli.command()
-def dropdb():
-    """
-    A command to Drop all tables in the database
-
-    Run with 'flask dropdb'.
-    """
-    db.drop_all()
-    click.echo('Dropped all tables')
+register_extensions(app)
+register_commands(app)
 
 
 if __name__ == '__main__':
