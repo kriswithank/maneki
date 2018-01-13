@@ -1,0 +1,48 @@
+{% macro render_field(field) %}
+  <dt>{{ field.label }}</dt>
+  <dd>{{ field(**kwargs)|safe }}
+  {% if field.errors %}
+    <ul class=errors>
+    {% for error in field.errors %}
+      <li>{{ error }}</li>
+    {% endfor %}
+    </ul>
+  {% endif %}
+  </dd>
+{% endmacro %}
+ <!DOCTYPE html>
+<html>
+<head>
+<title>Page Title</title>
+</head>
+<body>
+
+{{ new_transaction_data }}
+
+<div>
+  <h3>Transaction to add</h3>
+  <dl>
+    <dt>Date</dt>
+    <dd>{{ new_transaction_data['date'] }}</dd>
+    <dt>Total</dt>
+    <dd>{{ new_transaction_data['total'] }}</dd>
+    <dt>Tax</dt>
+    <dd>{{ new_transaction_data['tax'] }}</dd>
+    <dt>Payment Type</dt>
+    <dd>{{ new_transaction_data['payment_type'] }}</dd>
+    <dt>Retailer</dt>
+    <dd>{{ new_transaction_data['retailer'] }}</dd>
+    <dt>Description</dt>
+    <dd>{{ new_transaction_data['description'] }}</dd>
+  </dl>
+</div>
+
+<form method=post>
+  <dl>
+    {{ render_field(form.confirm) }}
+    {{ render_field(form.cancel) }}
+  </dl>
+</form>
+
+</body>
+</html>
