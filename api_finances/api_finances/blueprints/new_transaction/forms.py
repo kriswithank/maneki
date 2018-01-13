@@ -1,9 +1,5 @@
-from flask import Blueprint, render_template, abort, request, session
-from jinja2 import TemplateNotFound
 import wtforms
 from api_finances.utils.wtforms import ComboBoxField
-from api_finances import models
-from werkzeug.datastructures import ImmutableMultiDict
 
 
 class NewTransactionForm(wtforms.Form):

@@ -1,13 +1,14 @@
-from flask import Blueprint, render_template, abort, request, session
-from jinja2 import TemplateNotFound
-import wtforms
-from api_finances.utils.wtforms import ComboBoxField
+from flask import (Blueprint, render_template, request, session, redirect,
+                   url_for)
+from werkzeug.datastructures import ImmutableMultiDict
 from api_finances import models
 from api_finances.blueprints.new_transaction import forms
-from werkzeug.datastructures import ImmutableMultiDict
 
-new_transaction = Blueprint('simple_page', __name__,
-                        template_folder='templates')
+
+new_transaction = Blueprint(
+    'new_transaction',
+    __name__,
+    template_folder='templates')
 
 
 @new_transaction.route('/', methods=['GET', 'POST'])
