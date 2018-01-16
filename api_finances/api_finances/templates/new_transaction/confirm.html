@@ -17,23 +17,19 @@
 </head>
 <body>
 
-{{ new_transaction_data }}
-
 <div>
   <h3>Transaction to add</h3>
   <dl>
     <dt>Date</dt>
-    <dd>{{ new_transaction_data['date'] }}</dd>
+    <dd>{{ form.date.data }}</dd>
     <dt>Total</dt>
-    <dd>{{ new_transaction_data['total'] }}</dd>
+    <dd>{{ form.total.data }}</dd>
     <dt>Tax</dt>
-    <dd>{{ new_transaction_data['tax'] }}</dd>
+    <dd>{{ form.tax.data }}</dd>
     <dt>Payment Type</dt>
-    <dd>{{ new_transaction_data['payment_type'] }}</dd>
+    <dd>{{ form.payment_type.data }}</dd>
     <dt>Retailer</dt>
-    <dd>{{ new_transaction_data['retailer'] }}</dd>
-    <dt>Description</dt>
-    <dd>{{ new_transaction_data['description'] }}</dd>
+    <dd>{{ form.retailer.data }}</dd>
   </dl>
 </div>
 
