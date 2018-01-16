@@ -1,6 +1,6 @@
 """SQLAlchemy models for api_finances."""
 from api_finances.extensions import db
-
+from sqlalchemy.ext.hybrid import hybrid_property
 
 class Retailer(db.Model):
     """Model representation of a retailer."""
@@ -51,3 +51,19 @@ class Transaction(db.Model):
 
     retailer = db.relationship('Retailer', back_populates='transactions')
     payment_type = db.relationship('PaymentType', back_populates='transactions')
+
+    @hybrid_property
+    def decimal_total(self) -> float:
+        return float(self.total / 100)
+
+    @decimal_total.setter
+    def decimal_total(self, decimal_value: float):
+        self.total = int(decimal_value * 100)
+
+    @hybrid_property
+    def decimal_tax(self) -> float:
+        return float(self.tax / 100)
+
+    @decimal_tax.setter
+    def decimal_tax(self, decimal_value: float):
+        self.tax = int(decimal_value * 100)
