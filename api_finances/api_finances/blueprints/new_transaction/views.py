@@ -3,6 +3,7 @@ from flask import (Blueprint, render_template, request, session, redirect,
 from werkzeug.datastructures import MultiDict
 from api_finances import models
 from api_finances.blueprints.new_transaction import forms
+from api_finances.extensions import db
 
 
 new_transaction = Blueprint(
@@ -38,7 +39,28 @@ def confirm():
     form = forms.ConfirmTransactionForm(request.form)
     if request.method == 'POST' and form.validate():
         if form.confirm.data:
-            return 'Confirm'
+            retailer = models.Retailer.query.filter_by(
+                name=form.retailer.data).first()
+            payment_type = models.PaymentType.query.filter_by(
+                name=form.payment_type.data).first()
+            if retailer is None:
+                retailer = models.Retailer(name=form.retailer.data)
+                db.session.add(retailer)
+                flash(f'New retailer {retailer.name} created')
+            if payment_type is None:
+                payment_type = models.PaymentType(name=form.payment_type.data)
+                db.session.add(payment_type)
+                flash(f'New payment type {payment_type.name} created')
+            transaction = models.Transaction(
+                date=form.date.data,
+                total=form.total.data,
+                tax=form.tax.data,
+                description=form.description.data,
+                retailer=retailer,
+                payment_type=payment_type)
+            db.session.add(transaction)
+            db.session.commit()
+            return redirect(url_for('index'))
         elif form.cancel.data:
             return 'Cancel, popped from session'
     return render_template(
