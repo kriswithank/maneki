@@ -8,7 +8,6 @@ class NewTransactionForm(wtforms.Form):
     tax = wtforms.IntegerField(label='Tax')
     payment_type = ComboBoxField(label='Payment Type')
     retailer = ComboBoxField(label='Retailer')
-    description = wtforms.TextAreaField(label='Description')
     #TODO: Add submit button and clear button
 
 
@@ -18,6 +17,6 @@ class ConfirmTransactionForm(wtforms.Form):
     tax = wtforms.HiddenField()
     payment_type = wtforms.HiddenField()
     retailer = wtforms.HiddenField()
-    description = wtforms.HiddenField()
+    description = wtforms.TextAreaField(label='Description')
     confirm = wtforms.SubmitField(label='Confirm')
     cancel = wtforms.SubmitField(label='Cancel')
