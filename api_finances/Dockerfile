@@ -1,4 +1,4 @@
-FROM python:3.3.6-wheezy
+FROM python:3.6.4-jessie
 
 EXPOSE 80
 
