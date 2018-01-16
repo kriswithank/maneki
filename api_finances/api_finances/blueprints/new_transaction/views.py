@@ -1,5 +1,5 @@
 from flask import (Blueprint, render_template, request, session, redirect,
-                   url_for)
+                   url_for, flash)
 from werkzeug.datastructures import MultiDict
 from api_finances import models
 from api_finances.blueprints.new_transaction import forms
@@ -19,6 +19,12 @@ def init():
     form.retailer.options = retailer_names
     form.payment_type.options = payment_type_names
     if request.method == 'POST' and form.validate():
+        if form.payment_type.data not in retailer_names:
+            flash(f'Payment type {form.payment_type.data} does not exist, '
+                  f'a new payment type will be created')
+        if form.retailer.data not in retailer_names:
+            flash(f'Retailer {form.retailer.data} does not exist, '
+                  f'a new retailer will be created')
         return redirect(url_for('new_transaction.confirm'), 307)
     return render_template('new_transaction/init.html', form=form)
 
