@@ -1,13 +1,25 @@
 import wtforms
+from wtforms import validators
 from api_finances.utils.wtforms import ComboBoxField
 
 
 class NewTransactionForm(wtforms.Form):
-    date = wtforms.fields.DateField(label='Date', format='%Y-%m-%d')
-    total = wtforms.IntegerField(label='Total')
-    tax = wtforms.IntegerField(label='Tax')
-    payment_type = ComboBoxField(label='Payment Type')
-    retailer = ComboBoxField(label='Retailer')
+    date = wtforms.fields.DateField(
+        label='Date',
+        format='%Y-%m-%d',
+        validators=[validators.DataRequired()])
+    total = wtforms.IntegerField(
+        label='Total',
+        validators=[validators.DataRequired()])
+    tax = wtforms.IntegerField(
+        label='Tax',
+        validators=[validators.DataRequired()])
+    payment_type = ComboBoxField(
+        label='Payment Type',
+        validators=[validators.DataRequired()])
+    retailer = ComboBoxField(
+        label='Retailer',
+        validators=[validators.DataRequired()])
     #TODO: Add submit button and clear button
 
 
