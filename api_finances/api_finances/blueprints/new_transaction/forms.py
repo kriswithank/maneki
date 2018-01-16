@@ -13,5 +13,11 @@ class NewTransactionForm(wtforms.Form):
 
 
 class ConfirmTransactionForm(wtforms.Form):
+    date = wtforms.HiddenField()
+    total = wtforms.HiddenField()
+    tax = wtforms.HiddenField()
+    payment_type = wtforms.HiddenField()
+    retailer = wtforms.HiddenField()
+    description = wtforms.HiddenField()
     confirm = wtforms.SubmitField(label='Confirm')
     cancel = wtforms.SubmitField(label='Cancel')

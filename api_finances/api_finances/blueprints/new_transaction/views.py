@@ -23,7 +23,7 @@ def init():
         form = forms.NewTransactionForm(formdata=MultiDict(new_transaction_data))
     if request.method == 'POST' and form.validate():
         session['new_transaction_data'] = MultiDict(form.data)
-        return redirect(url_for('new_transaction.confirm'))
+        return redirect(url_for('new_transaction.confirm'), 307)
     return render_template(
         'new_transaction/init.html',
         new_transaction_data=new_transaction_data,
