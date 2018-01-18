@@ -53,8 +53,8 @@ def confirm():
                 flash(f'New payment type {payment_type.name} created')
             transaction = models.Transaction(
                 date=form.date.data,
-                total=form.total.data,
-                tax=form.tax.data,
+                decimal_total=form.total.data,
+                decimal_tax=form.tax.data,
                 description=form.description.data,
                 retailer=retailer,
                 payment_type=payment_type)

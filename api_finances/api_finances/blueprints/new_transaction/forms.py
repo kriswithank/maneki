@@ -8,11 +8,13 @@ class NewTransactionForm(wtforms.Form):
         label='Date',
         format='%Y-%m-%d',
         validators=[validators.DataRequired()])
-    total = wtforms.IntegerField(
+    total = wtforms.DecimalField(
         label='Total',
+        places=2,
         validators=[validators.DataRequired()])
-    tax = wtforms.IntegerField(
+    tax = wtforms.DecimalField(
         label='Tax',
+        places=2,
         validators=[validators.DataRequired()])
     payment_type = ComboBoxField(
         label='Payment Type',
