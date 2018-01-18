@@ -72,7 +72,7 @@ class Transaction(db.Model):
 
     @decimal_total.setter
     def decimal_total(self, decimal_value: float):
-        self.total = int(decimal_value * 100)
+        self.total = int(float(decimal_value) * 100)
 
     @hybrid_property
     def decimal_tax(self) -> float:
@@ -80,4 +80,4 @@ class Transaction(db.Model):
 
     @decimal_tax.setter
     def decimal_tax(self, decimal_value: float):
-        self.tax = int(decimal_value * 100)
+        self.tax = int(float(decimal_value) * 100)
