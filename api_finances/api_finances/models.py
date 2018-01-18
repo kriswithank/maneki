@@ -37,8 +37,22 @@ class Transaction(db.Model):
     Currency amounts are stored in cents so that we can store them as integers
     an not have to worry about inaccuracies with floating points.
     """
-
     __tablename__ = 'transaction'
+
+    def __init__(self, **kwargs):
+        """
+        Initialize a Transaction allowing use of hybrid properties.
+
+        If both the decimal_tax and tax are given, then decimal_tax will
+        take precedence over tax. Similarly for total and decimal_total.
+        """
+        if 'decimal_tax' in kwargs:
+            self.decimal_tax = kwargs.pop('decimal_tax')
+            kwargs['tax'] = self.tax
+        if 'decimal_total' in kwargs:
+            self.decimal_total = kwargs.pop('decimal_total')
+            kwargs['total'] = self.total
+        super().__init__(**kwargs)
 
     id = db.Column(db.Integer, primary_key=True)
     date = db.Column(db.DateTime, nullable=False)
@@ -54,7 +68,7 @@ class Transaction(db.Model):
 
     @hybrid_property
     def decimal_total(self) -> float:
-        return float(self.total / 100)
+        return float((self.total or 0) / 100)
 
     @decimal_total.setter
     def decimal_total(self, decimal_value: float):
@@ -62,7 +76,7 @@ class Transaction(db.Model):
 
     @hybrid_property
     def decimal_tax(self) -> float:
-        return float(self.tax / 100)
+        return float((self.tax or 0) / 100)
 
     @decimal_tax.setter
     def decimal_tax(self, decimal_value: float):
