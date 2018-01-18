@@ -11,11 +11,19 @@ class NewTransactionForm(wtforms.Form):
     total = wtforms.DecimalField(
         label='Total',
         places=2,
-        validators=[validators.DataRequired()])
+        validators=[
+            validators.InputRequired(),
+            validators.NumberRange(
+                min=0.009999,  # Can't set to 0.01, invalid when total=0.01
+                message='Must have transaction of at least 1 cent')])
     tax = wtforms.DecimalField(
         label='Tax',
         places=2,
-        validators=[validators.DataRequired()])
+        validators=[
+            validators.InputRequired(),
+            validators.NumberRange(
+                min=0,
+                message='Cannot have negative tax')])
     payment_type = ComboBoxField(
         label='Payment Type',
         validators=[validators.DataRequired()])
