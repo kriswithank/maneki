@@ -58,8 +58,8 @@
       <td>{{ transaction.date.strftime('%Y-%m-%d') }}</td>
       <td>{{ transaction.payment_type.name }}</td>
       <td>{{ transaction.retailer.name }}</td>
-      <td>{{ transaction.total }}</td>
-      <td>{{ transaction.tax }}</td>
+      <td>{{ '%0.2f'|format(transaction.decimal_total) }}</td>
+      <td>{{ '%0.2f'|format(transaction.decimal_tax) }}</td>
       <td>{{ transaction.description }}</td>
     </tr>
     {% endfor %}

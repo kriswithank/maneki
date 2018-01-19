@@ -1,4 +1,5 @@
 import wtforms
+from decimal import Decimal
 from wtforms import validators
 from api_finances.utils.wtforms import ComboBoxField
 
@@ -8,12 +9,22 @@ class NewTransactionForm(wtforms.Form):
         label='Date',
         format='%Y-%m-%d',
         validators=[validators.DataRequired()])
-    total = wtforms.IntegerField(
+    total = wtforms.DecimalField(
         label='Total',
-        validators=[validators.DataRequired()])
-    tax = wtforms.IntegerField(
+        places=2,
+        validators=[
+            validators.InputRequired(),
+            validators.NumberRange(
+                min=Decimal('0.01'),
+                message='Must have transaction of at least 1 cent')])
+    tax = wtforms.DecimalField(
         label='Tax',
-        validators=[validators.DataRequired()])
+        places=2,
+        validators=[
+            validators.InputRequired(),
+            validators.NumberRange(
+                min=0,
+                message='Cannot have negative tax')])
     payment_type = ComboBoxField(
         label='Payment Type',
         validators=[validators.DataRequired()])
