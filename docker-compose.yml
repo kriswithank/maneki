@@ -9,15 +9,15 @@ services:
     depends_on:
       - database
 
-  api_finances:
-    build: ./api_finances
+  finances:
+    build: ./finances
     depends_on:
       - database
 
   simplepages:
     build: ./simplepages
     depends_on:
-      - api_finances
+      - finances
 
   nginx:
     build: ./nginx
@@ -25,4 +25,4 @@ services:
       - 80:8000
     depends_on:
       - simplepages
-      - api_finances
+      - finances

@@ -1,7 +1,7 @@
 import wtforms
 from decimal import Decimal
 from wtforms import validators
-from api_finances.utils.wtforms import ComboBoxField
+from finances.utils.wtforms import ComboBoxField
 
 
 class NewTransactionForm(wtforms.Form):

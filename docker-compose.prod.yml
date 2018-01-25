@@ -1,7 +1,7 @@
 version: '3'
 
 services:
-  api-finances:
+  finances:
     command: "gunicorn -w 3 --bind 0.0.0.0:80 src.wsgi:app"
 
   simplepages:
