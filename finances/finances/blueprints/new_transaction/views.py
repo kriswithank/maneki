@@ -1,9 +1,9 @@
 from flask import (Blueprint, render_template, request, session, redirect,
                    url_for, flash)
 from werkzeug.datastructures import MultiDict
-from api_finances import models
-from api_finances.blueprints.new_transaction import forms
-from api_finances.extensions import db
+from finances import models
+from finances.blueprints.new_transaction import forms
+from finances.extensions import db
 
 
 new_transaction = Blueprint(

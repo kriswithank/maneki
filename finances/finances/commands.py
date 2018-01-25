@@ -1,10 +1,10 @@
-"""Cli commands for api_finances."""
+"""Cli commands for finances."""
 import click
 
 from flask import current_app
 
-from api_finances import models, utils  # models required import to create all tables
-from api_finances.extensions import db
+from finances import models, utils  # models required import to create all tables
+from finances.extensions import db
 
 
 def register_commands(app):

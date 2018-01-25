@@ -10,11 +10,11 @@ from flask_restful import Resource
 from datetime import datetime
 from werkzeug.datastructures import ImmutableMultiDict
 
-from api_finances.extensions import db, api, register_extensions
-from api_finances.commands import register_commands
-from api_finances import models
-from api_finances.utils.wtforms import ComboBoxField
-from api_finances.blueprints.new_transaction.views import new_transaction
+from finances.extensions import db, api, register_extensions
+from finances.commands import register_commands
+from finances import models
+from finances.utils.wtforms import ComboBoxField
+from finances.blueprints.new_transaction.views import new_transaction
 
 
 app = Flask(__name__)

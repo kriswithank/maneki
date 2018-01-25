@@ -1,5 +1,5 @@
-"""SQLAlchemy models for api_finances."""
-from api_finances.extensions import db
+"""SQLAlchemy models for finances."""
+from finances.extensions import db
 from sqlalchemy.ext.hybrid import hybrid_property
 
 class Retailer(db.Model):

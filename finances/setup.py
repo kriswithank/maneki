@@ -1,12 +1,12 @@
-"""Setup file for api_finances python package."""
+"""Setup file for finances python package."""
 from setuptools import setup
 
 setup(
-    name='api_finances',
+    name='finances',
     version='0.1',
-    description='An api for handling personal finances',
+    description='A microservice for handling personal finances',
     url='https://github.com/kriswithank/maneki',
     author='Kris Swann',
     license='MIT',
-    packages=['api_finances'],
+    packages=['finances'],
     zip_safe=False)

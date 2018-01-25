@@ -15,10 +15,10 @@ services:
       - FLASK_DEBUG=1
       - FLASK_CONFIG_OVERRIDE=/app/api_auth/config/dev.cfg
 
-  api_finances:
+  finances:
     command: 'flask run --host=0.0.0.0 --port=80'
     volumes:
-      - ./api_finances:/app/api_finances
+      - ./finances:/app/finances
     ports:
       - 5001:80
 
