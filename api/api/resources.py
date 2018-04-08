@@ -90,9 +90,18 @@ class TransactionResource(Resource):
         return jsonify({
             'message': 'Success',
             'transactions': [{
-                'id': x.id,
-                'description': x.description,
-            } for x in transactions],
+                'id': t.id,
+                'date': t.date,
+                'description': t.description,
+                'buyer_id': t.buyer.id,
+                'seller_id': t.seller.id,
+                'payment_type_id': t.payment_type.id,
+                'transaction_categories': [{
+                    'id': c.id,
+                    'ammount': c.ammount,
+                    'category_id': c.category.id,
+                } for c in t.transaction_categories],
+            } for t in transactions],
         })
 
 
