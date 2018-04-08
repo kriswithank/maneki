@@ -9,7 +9,7 @@ from marshmallow import (Schema, ValidationError, fields, validates,
                          validates_schema)
 from webargs.flaskparser import use_args
 
-from api.models import User
+from api import models
 
 
 class CredentialSchema(Schema):
@@ -26,7 +26,7 @@ class CredentialSchema(Schema):
     @validates('username')
     def user_exists(self, value: str) -> None:
         """Query the database to see if a user with the given username exists."""
-        target_user = User.query.filter_by(username=value).first()
+        target_user = models.User.query.filter_by(username=value).first()
         if target_user is None:
             raise ValidationError('No such user exists.')
 
@@ -38,7 +38,7 @@ class CredentialSchema(Schema):
         Since this is only run if all field validations pass, we know that target_user
         is not None.
         """
-        target_user = User.query.filter_by(username=data['username']).first()
+        target_user = models.User.query.filter_by(username=data['username']).first()
         if data['password'] != target_user.password:
             raise ValidationError('Password is incorrect.', ['password'])
 
@@ -81,7 +81,23 @@ class TokenResourse(Resource):
             'token': token})
 
 
+class TransactionResource(Resource):
+    """A RESTful resource for transactions belonging to a user."""
+
+    def get(self, user_id):
+        """Return all transactions belonging to the given user."""
+        transactions = models.Transaction.query.filter_by(user_id=user_id).all()
+        return jsonify({
+            'message': 'Success',
+            'transactions': [{
+                'id': x.id,
+                'description': x.description,
+            } for x in transactions],
+        })
+
+
 def register_resources(api):
     """Register Flask-RESTful resources to the given api."""
     api.add_resource(UserResourse, '/user')
     api.add_resource(TokenResourse, '/token')
+    api.add_resource(TransactionResource, '/transaction/<int:user_id>')

@@ -29,8 +29,8 @@ class Retailer(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     user = db.relationship('User', back_populates='retailers')
 
-    transactions_buyer = db.relationship('Transaction', back_populates='buyer')
-    transactions_seller = db.relationship('Transaction', back_populates='seller')
+    transactions_buyer = db.relationship('Transaction', foreign_keys='Transaction.buyer_id', back_populates='buyer')
+    transactions_seller = db.relationship('Transaction', foreign_keys='Transaction.seller_id',  back_populates='seller')
 
 
 class PaymentType(db.Model):
@@ -49,12 +49,7 @@ class PaymentType(db.Model):
 
 
 class Transaction(db.Model):
-    """
-    Model representation of a transaction.
-
-    Currency amounts are stored in cents so that we can store them as integers
-    an not have to worry about inaccuracies with floating points.
-    """
+    """Model representation of a transaction."""
 
     __tablename__ = 'transaction'
 
@@ -62,11 +57,17 @@ class Transaction(db.Model):
     date = db.Column(db.DateTime, nullable=False)
     description = db.Column(db.Text, nullable=False)
 
-    buyer_id = db.Column(db.Integer, db.ForeignKey('transaction.id'))
-    buyer = db.relationship('Retailer', back_populates='transactions_buyer')
+    buyer_id = db.Column(db.Integer, db.ForeignKey('retailer.id'))
+    buyer = db.relationship(
+        'Retailer',
+        foreign_keys='Transaction.buyer_id',
+        back_populates='transactions_buyer')
 
-    seller_id = db.Column(db.Integer, db.ForeignKey('transaction.id'))
-    seller = db.relationship('Retailer', back_populates='transactions_seller')
+    seller_id = db.Column(db.Integer, db.ForeignKey('retailer.id'))
+    seller = db.relationship(
+        'Retailer',
+        foreign_keys='Transaction.seller_id',
+        back_populates='transactions_seller')
 
     payment_type_id = db.Column(db.Integer, db.ForeignKey('payment_type.id'))
     payment_type = db.relationship('PaymentType', back_populates='transactions')
@@ -78,7 +79,12 @@ class Transaction(db.Model):
 
 
 class Category(db.Model):
-    """Model representation of a category."""
+    """
+    Model representation of a category.
+
+    Currency amounts are stored in cents so that we can store them as integers
+    an not have to worry about inaccuracies with floating points.
+    """
 
     __tablename__ = 'category'
 
@@ -98,9 +104,10 @@ class TransactionCategory(db.Model):
     __tablename__ = 'transaction_category'
 
     id = db.Column(db.Integer, primary_key=True)
+    ammount = db.Column(db.Integer)
 
     transaction_id = db.Column(db.Integer, db.ForeignKey('transaction.id'))
     transaction = db.relationship('Transaction', back_populates='transaction_categories')
 
     category_id = db.Column(db.Integer, db.ForeignKey('category.id'))
-    Category = db.relationship('Category', back_populates='transaction_categories')
+    category = db.relationship('Category', back_populates='transaction_categories')
