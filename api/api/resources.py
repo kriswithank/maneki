@@ -36,29 +36,6 @@ class CredentialSchema(Schema):
         data['user_id'] = target_user.id
 
 
-# class AuthenticationSchema(Schema):
-#     """Schema for authenticating the jwt token provided."""
-
-#     class Meta:
-#         """Enforce required and validated fields by enabling strict evaluation."""
-
-#         strict = True
-#         additional = ('payload', 'user_id')
-
-#     token = fields.Str(required=True)
-
-#     @validates_schema(skip_on_field_errors=True)
-#     def validate_token(self, data):
-#         """Check that the jwt token is valid and store user_id."""
-#         token = data['token']
-#         try:
-#             jwt.decode(token, current_app.config['SECRET_KEY'], algorithm='HS256')
-#         except jwt.ExpiredSignatureError:
-#             raise ValidationError('Token expired', ['token'])
-#         except Exception as e:
-#             raise ValidationError('General exception occured', ['token'])
-
-
 class UserResourse(Resource):
     """A restful resource for users."""
 
