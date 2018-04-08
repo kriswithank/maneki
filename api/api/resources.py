@@ -63,7 +63,7 @@ class TokenResourse(Resource):
     """A RESTful resource for authorization tokens."""
 
     @use_args(CredentialSchema())
-    def get(self, args):
+    def post(self, args):
         """Get a JWT if the credentials are valid."""
         expiration = datetime.utcnow() + timedelta(seconds=60)
         content = {
