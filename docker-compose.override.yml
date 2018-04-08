@@ -5,6 +5,16 @@ services:
     ports:
       - 5432:5432
 
+  api:
+    command: 'flask run --host=0.0.0.0 --port=80'
+    volumes:
+      - ./api:/app/api
+    ports:
+      - 5003:80
+    environment:
+      - FLASK_DEBUG=1
+      - FLASK_CONFIG_OVERRIDE=/app/api/config/dev.cfg
+
   api_auth:
     command: 'flask run --host=0.0.0.0 --port=80'
     volumes:

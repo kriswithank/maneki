@@ -4,6 +4,11 @@ services:
   database:
     image: postgres
 
+  api:
+    build: ./api
+    depends_on:
+      - database
+
   api_auth:
     build: ./api_auth
     depends_on:
