@@ -36,22 +36,6 @@ class CredentialSchema(Schema):
         data['user_id'] = target_user.id
 
 
-class UserResourse(Resource):
-    """A restful resource for users."""
-
-    def put(self):
-        """Create a new user."""
-        pass
-
-    def post(self):
-        """Change an existing user's password."""
-        pass
-
-    def delete(self):
-        """Delete an existing user."""
-        pass
-
-
 class TokenResourse(Resource):
     """A RESTful resource for authorization tokens."""
 
@@ -115,6 +99,22 @@ def authenticate(func):
 
         return func(*args, user_id=payload['user_id'], **kwargs)
     return wrapper
+
+
+class UserResourse(Resource):
+    """A restful resource for users."""
+
+    def post(self):
+        """Create a new user."""
+        pass
+
+    def put(self):
+        """Change an existing user's password."""
+        pass
+
+    def delete(self):
+        """Delete an existing user."""
+        pass
 
 
 class TransactionResource(Resource):
