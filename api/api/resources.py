@@ -13,8 +13,8 @@ from webargs.flaskparser import use_args
 from api import models
 
 
-class CredentialSchema(Schema):
-    """Schema for validating user credentials."""
+class AuthenticationSchema(Schema):
+    """Marshmallow schema for validating user credentials."""
 
     class Meta:
         """Enforce required and validated fields by enabling strict evaluation."""
@@ -39,7 +39,7 @@ class CredentialSchema(Schema):
 class TokenResourse(Resource):
     """A RESTful resource for authorization tokens."""
 
-    @use_args(CredentialSchema())
+    @use_args(AuthenticationSchema())
     def post(self, args):
         """Get a JWT if the credentials are valid."""
         expiration = datetime.utcnow() + timedelta(minutes=15)
@@ -122,7 +122,7 @@ class TransactionResource(Resource):
 
     @authenticate
     def get(self, user_id):
-        """Return all transactions belonging to the given user."""
+        """Return all transactions belonging to the authenticated user."""
         transactions = models.Transaction.query.filter_by(user_id=user_id).all()
         return jsonify({
             'message': 'Success',

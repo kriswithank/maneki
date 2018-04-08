@@ -13,9 +13,7 @@ def register_commands(app):
     Example:
         @app.cli.command()
         def somecommand():
-            ...
-            do some stuff
-            ...
+            # do some stuff
 
     This registers a command that you can then run with
         flask somecommand

@@ -7,8 +7,8 @@ from webargs.flaskparser import parser, use_args
 from api import const
 from api.commands import register_commands
 from api.extensions import api, register_extensions
-from api.resources import CredentialSchema, register_resources
-from api.utils import JSONError, token_required
+from api.resources import register_resources
+from api.utils import JSONError
 
 
 def create_app(config_override_file=None):
@@ -51,12 +51,5 @@ def create_app(config_override_file=None):
     register_resources(api)
     register_extensions(app)
     register_commands(app)
-
-    @app.route('/foo-route')
-    @token_required
-    @use_args(CredentialSchema())
-    def foo_route(data):
-        """Test 'token-required' decorator."""
-        return str(data)
 
     return app
