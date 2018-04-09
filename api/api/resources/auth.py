@@ -1,4 +1,5 @@
-"""RESTful resources for api."""
+"""RESTful resources for api involving auth."""
+
 from datetime import datetime, timedelta
 
 import jwt
@@ -11,7 +12,6 @@ from marshmallow import (Schema, ValidationError, fields, validates,
 from webargs.flaskparser import use_args
 
 from api import models
-
 
 class AuthenticationSchema(Schema):
     """Marshmallow schema for validating user credentials."""
@@ -100,50 +100,3 @@ def authenticate(func):
         return func(*args, user_id=payload['user_id'], **kwargs)
     return wrapper
 
-
-class UserResourse(Resource):
-    """A restful resource for users."""
-
-    def post(self):
-        """Create a new user."""
-        pass
-
-    def put(self):
-        """Change an existing user's password."""
-        pass
-
-    def delete(self):
-        """Delete an existing user."""
-        pass
-
-
-class TransactionResource(Resource):
-    """A RESTful resource for transactions belonging to a user."""
-
-    @authenticate
-    def get(self, user_id):
-        """Return all transactions belonging to the authenticated user."""
-        transactions = models.Transaction.query.filter_by(user_id=user_id).all()
-        return jsonify({
-            'message': 'Success',
-            'transactions': [{
-                'id': t.id,
-                'date': t.date,
-                'description': t.description,
-                'buyer_id': t.buyer.id,
-                'seller_id': t.seller.id,
-                'payment_type_id': t.payment_type.id,
-                'transaction_categories': [{
-                    'id': c.id,
-                    'ammount': c.ammount,
-                    'category_id': c.category.id,
-                } for c in t.transaction_categories],
-            } for t in transactions],
-        })
-
-
-def register_resources(api):
-    """Register Flask-RESTful resources to the given api."""
-    api.add_resource(UserResourse, '/user')
-    api.add_resource(TokenResourse, '/token')
-    api.add_resource(TransactionResource, '/transaction')

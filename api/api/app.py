@@ -7,7 +7,7 @@ from webargs.flaskparser import parser, use_args
 from api import const
 from api.commands import register_commands
 from api.extensions import api, register_extensions
-from api.resources import register_resources
+from api.resources.register import register_resources
 from api.utils import JSONError
 
 
